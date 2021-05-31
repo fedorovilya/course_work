@@ -1,0 +1,43 @@
+version: '3.1'
+
+services:
+  influxdb:
+    image: influxdb:1.8
+    container_name: course_influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+
+  telegraf:
+    image: telegraf:latest
+    container_name: course_telegraf
+    links:
+      - influxdb
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: course_grafana
+    ports:
+      - "3000:3000"
+    links:
+      - influxdb
+    depends_on:
+      - influxdb
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  mosquitto:
+      image: eclipse-mosquitto:1.5
+      hostname: mosquitto
+      container_name: course_mosquitto
+      ports:
+        - "1883:1883"
+
+volumes:
+  influxdb-storage:
+  grafana-storage:
